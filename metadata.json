@@ -1,0 +1,5 @@
+{
+  "name": "SketchIdentify",
+  "description": "A party game where you describe friends and draw them based on descriptions. Play solo against AI personalities powered by Gemini!",
+  "requestFramePermissions": []
+}

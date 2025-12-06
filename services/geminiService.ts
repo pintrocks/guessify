@@ -2,7 +2,19 @@ import { GoogleGenAI } from "@google/genai";
 import { Player } from "../types";
 
 // Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+const getAiClient = (): GoogleGenAI => {
+  if (aiInstance) return aiInstance;
+
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("VITE_GEMINI_API_KEY is not set. AI features will likely fail.");
+  }
+
+  aiInstance = new GoogleGenAI({ apiKey: apiKey || 'dummy-key-to-prevent-crash' });
+  return aiInstance;
+};
 
 /**
  * Generates a description of a target player as if it were written by a specific persona.
@@ -12,6 +24,7 @@ export const generateAiDescription = async (
   target: Player
 ): Promise<string> => {
   try {
+    const ai = getAiClient();
     const prompt = `
       You are playing a party game where you have to describe people.
       You are: ${describer.name}, a funny and casual character.
@@ -43,6 +56,7 @@ export const generateAiGuess = async (
   candidates: Player[]
 ): Promise<string> => {
   try {
+    const ai = getAiClient();
     const candidateList = candidates.map(c => `- ID: ${c.id}, Name: ${c.name}, Avatar: ${c.avatar}`).join('\n');
     const prompt = `
       You are playing a guessing game.
@@ -79,6 +93,7 @@ export const generateAiDrawing = async (
   try {
     // We use the 'gemini-3-pro-image-preview' for better image generation if available,
     // or fallback to 'gemini-2.5-flash-image'.
+    const ai = getAiClient();
     
     const prompt = `
       A crude, hand-drawn style digital sketch of: ${description}. 
